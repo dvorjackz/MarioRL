@@ -11,3 +11,9 @@ There will be an error installing baselines using the last command, at which poi
 pip3 install "git+https://github.com/openai/baselines.git@master#egg=baselines-0.1.6"
 pip3 install -r requirements.txt
 ```
+
+## PMIX Error
+Solve by using the following line:
+```
+export PMIX_MCA_gds=hash
+```
