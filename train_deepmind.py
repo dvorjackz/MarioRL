@@ -15,7 +15,7 @@ tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 print ("Setting up environment...")
 env = gym_super_mario_bros.make('SuperMarioBros-v3')
 env = JoypadSpace(env, RIGHT_ONLY)
-env = FrameStack(env, k=4)
+env = FrameStack(env, n_frames=4)
 
 # eval_callback = EvalCallback(env,
 #                              best_model_save_path='./logs/',
