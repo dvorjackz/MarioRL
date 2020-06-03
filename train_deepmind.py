@@ -5,8 +5,8 @@ from stable_baselines import DQN, ACER
 from stable_baselines.common.vec_env import SubprocVecEnv
 from stable_baselines.deepq.policies import MlpPolicy, CnnPolicy, LnCnnPolicy
 # from stable_baselines.common.policies import MlpPolicy, CnnPolicy
+from stable_baselines.common.atari_wrappers import FrameStack
 from stable_baselines.common.callbacks import CallbackList, EvalCallback
-from baselines.common.atari_wrappers import FrameStack
 from callbacks import ProgressBarManager
 import tensorflow as tf
 # Suppress warnings
