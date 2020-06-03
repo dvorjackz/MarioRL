@@ -24,7 +24,6 @@ _ENEMY_TYPE_ADDRESSES = [0x0016, 0x0017, 0x0018, 0x0019, 0x001A]
 # Flagpole = 0x31
 _STAGE_OVER_ENEMIES = np.array([0x2D, 0x31])
 
-
 class SuperMarioBrosEnv(NESEnv):
     """An environment for playing Super Mario Bros with OpenAI Gym."""
 

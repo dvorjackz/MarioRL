@@ -5,3 +5,4 @@ mario_tensorboard/
 dqn.zip
 .vscode/
 __pycache__/
+logs/
