@@ -29,7 +29,7 @@ class SuperMarioBrosEnv(NESEnv):
     """An environment for playing Super Mario Bros with OpenAI Gym."""
 
     # the legal range of rewards for each step
-    reward_range = (-25, 25)
+    reward_range = (-15, 15)
 
     def __init__(self, rom_mode='vanilla', lost_levels=False, target=None):
         """
@@ -59,6 +59,8 @@ class SuperMarioBrosEnv(NESEnv):
         self._x_position_last = 0
         # if Mario stands still, this timer goes up
         self._standstill_timer = 0
+        # timestep
+        self._timestep = 0
         # reset the emulator
         self.reset()
         # skip the start screen
@@ -366,6 +368,7 @@ class SuperMarioBrosEnv(NESEnv):
         self._time_last = 0
         self._x_position_last = 0
         self._standstill_timer = 0
+        self._timestep = 0
 
     def _did_reset(self):
         """Handle any RAM hacking after a reset occurs."""
@@ -384,6 +387,7 @@ class SuperMarioBrosEnv(NESEnv):
 
         """
         # if done flag is set a reset is incoming anyway, ignore any hacking
+        self._timestep += 1
         if done:
             return
         # if mario is dying, then cut to the chase and kill him,
@@ -422,6 +426,7 @@ class SuperMarioBrosEnv(NESEnv):
             x_pos=self._x_position,
             y_pos=self._y_position,
             standstill=self._standstill_timer,
+            timestep = self._timestep,
         )
 
 
