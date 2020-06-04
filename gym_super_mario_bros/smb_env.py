@@ -1,5 +1,7 @@
 """An OpenAI Gym environment for Super Mario Bros. and Lost Levels."""
 from collections import defaultdict
+from types import SimpleNamespace
+
 from nes_py import NESEnv
 import numpy as np
 from ._roms import decode_target
@@ -60,6 +62,9 @@ class SuperMarioBrosEnv(NESEnv):
         self._standstill_timer = 0
         # timestep
         self._timestep = 0
+        # life variable that makes this compatible with EpisodicLifeEnv from atari_wrappers.py
+        self.unwrapped.ale = SimpleNamespace()
+        self.ale.lives = self.lives
         # reset the emulator
         self.reset()
         # skip the start screen
@@ -132,6 +137,9 @@ class SuperMarioBrosEnv(NESEnv):
         """Return the number of coins collected (0 to 99)."""
         # coins are represented as a figure with 2 10's places
         return self._read_mem_range(0x07ed, 2)
+
+    def lives(self):
+        return self._life
 
     @property
     def _life(self):
@@ -326,10 +334,10 @@ class SuperMarioBrosEnv(NESEnv):
     def _x_reward(self):
         """Return the reward based on left right movement between steps."""
         _reward = self._x_position - self._x_position_last
-        # if (abs(self._x_position - self._x_position_last) < 1):
-        #     self._standstill_timer += 1
-        # else:
-        #     self._standstill_timer = 0
+        if (abs(self._x_position - self._x_position_last) < 1):
+            self._standstill_timer += 1
+        else:
+            self._standstill_timer = 0
         # _reward -= self._standstill_timer * 0.5
         self._x_position_last = self._x_position
         # TODO: check whether this is still necessary

@@ -2,7 +2,8 @@
 *.pkl
 *~
 mario_tensorboard/
-dqn.zip
+tensorboard_old/
+models/
 .vscode/
 __pycache__/
 logs/
