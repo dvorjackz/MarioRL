@@ -1,71 +1,83 @@
 from nes_py.wrappers import JoypadSpace
 import gym_super_mario_bros
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT, RIGHT_ONLY, COMPLEX_MOVEMENT
-from stable_baselines import DQN, ACER
+from stable_baselines import DQN
+from stable_baselines.bench import Monitor
 from stable_baselines.common.vec_env import SubprocVecEnv
-# from stable_baselines.deepq.policies import MlpPolicy, CnnPolicy
-from stable_baselines.common.policies import MlpPolicy, CnnPolicy
-from stable_baselines.common.callbacks import CallbackList, EvalCallback
-from baselines.common.atari_wrappers import FrameStack
+from stable_baselines.deepq.policies import MlpPolicy, CnnPolicy, LnCnnPolicy
+from stable_baselines.common.atari_wrappers import FrameStack, WarpFrame, MaxAndSkipEnv, EpisodicLifeEnv
+from stable_baselines.common.callbacks import CallbackList, EvalCallback, CheckpointCallback
 from callbacks import ProgressBarManager
 import tensorflow as tf
+from matplotlib import pyplot as plt
+import cv2
+import os
 # Suppress warnings
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
-print ("Setting up environment...")
-env = gym_super_mario_bros.make('SuperMarioBros-v3')
-env = JoypadSpace(env, SIMPLE_MOVEMENT)
-env = FrameStack(env, k=4)
+def test_env(env, frame_by_frame=False):
+    obs = env.reset()
+    while True:
+        obs, rewards, dones, info = env.step(env.action_space.sample())
+        print(obs._frames)
+        if (frame_by_frame):
+            cv2.imshow("frames", obs._frames[0])
+            cv2.waitKey()
+        else:
+            env.render()
+        print("reward:", rewards)
+        print("timestep:", info['timestep'])
 
-# eval_callback = EvalCallback(env,
-#                              best_model_save_path='./logs/',
-#                              log_path='./logs/',
-#                              eval_freq=1000,
-#                              deterministic=True,
-#                              render=False)
+def run(run_name):
 
-print("Compiling model...")
-model = ACER(CnnPolicy,
-            env,
-            verbose=1,
-            learning_starts=1000,
-            learning_rate=1e-4,
-            exploration_final_eps=0.01,
-            prioritized_replay=True,
-            prioritized_replay_alpha=0.6,
-			train_freq=4,
-            tensorboard_log="./mario_tensorboard/"
-        )
+    # Create log dir
+    log_dir = "./monitor_logs/"
+    os.makedirs(log_dir, exist_ok=True)
 
 
-'''
-ACER
-  policy: 'CnnPolicy'
-  n_envs: 16
-  n_timesteps: !!float 1e7
-  lr_schedule: 'constant'
-  buffer_size: 5000
-  ent_coef: 0.01
+    print ("Setting up environment...")
+    env = gym_super_mario_bros.make('SuperMarioBros-v2')
+    env = JoypadSpace(env, RIGHT_ONLY)
+    env = WarpFrame(env)
+    env = FrameStack(env, n_frames=4)
+    env = EpisodicLifeEnv(env)
+    # Logs will be saved in log_dir/monitor.csv
+    env = Monitor(env, log_dir)
 
-PPO2 
-  n_envs: 8
-  n_steps: 128
-  noptepochs: 4
-  nminibatches: 4
-  n_timesteps: !!float 1e7
-  learning_rate: lin_2.5e-4
-  cliprange: lin_0.1
-  vf_coef: 0.5
-  ent_coef: 0.01
-  cliprange_vf: -1
-'''
+    # Save a checkpoint every 1000 steps
+    checkpoint_callback = CheckpointCallback(save_freq=5000, save_path='./logs/',
+                                            name_prefix=run_name)
 
-print("Training starting...")
-steps = 5000
-with ProgressBarManager(steps) as progress_callback:
-    model.learn(total_timesteps=steps,
-                callback=[progress_callback],
-                tb_log_name="framestack")
+    eval_callback = EvalCallback(env,
+                                best_model_save_path='./logs/',
+                                log_path='./logs/',
+                                eval_freq=10000,
+                                deterministic=True,
+                                render=False)
 
-print("Done! Saving model...")
-model.save("dqn")
+    print("Compiling model...")
+    steps = 50
+
+    model = DQN(CnnPolicy,
+                env,
+                verbose=1,
+                learning_starts=2500,
+                learning_rate=1e-4,
+                exploration_final_eps=0.01,
+                prioritized_replay=True,
+                prioritized_replay_alpha=0.6,
+                train_freq=1,
+                tensorboard_log="./mario_tensorboard/"
+            )
+
+    print("Training starting...")
+    with ProgressBarManager(steps) as progress_callback:
+        model.learn(total_timesteps=steps,
+                    callback=[progress_callback],#, eval_callback, checkpoint_callback],
+                    tb_log_name=run_name)
+
+    print("Done! Saving model...")
+    model.save("models/{}".format(run_name))
+
+if __name__ == "__main__":
+    run("dqn")
