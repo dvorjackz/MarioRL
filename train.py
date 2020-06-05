@@ -10,6 +10,9 @@ from callbacks import ProgressBarManager
 import tensorflow as tf
 from matplotlib import pyplot as plt
 import cv2
+import argparse
+
+
 # Suppress warnings
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
@@ -28,9 +31,9 @@ def test_env(env, frame_by_frame=False):
         print("timestep:", info['timestep'])
 
 
-def run(run_name):
+def run(model_name):
     print("Setting up environment...")
-    env = gym_super_mario_bros.make('SuperMarioBros-v2')
+    env = gym_super_mario_bros.make('SuperMarioBros-1-3-v2')
     env = JoypadSpace(env, RIGHT_ONLY)
     env = WarpFrame(env)
     env = FrameStack(env, n_frames=4)
@@ -39,7 +42,7 @@ def run(run_name):
 
     # Save a checkpoint every 1000 steps
     checkpoint_callback = CheckpointCallback(save_freq=5000, save_path='./logs/',
-                                             name_prefix=run_name)
+                                             name_prefix=model_name)
 
     eval_callback = EvalCallback(env,
                                  best_model_save_path='./logs/',
@@ -49,7 +52,12 @@ def run(run_name):
                                  render=False)
 
     print("Compiling model...")
-    steps = 5000
+    steps = 10000
+
+    try:
+        model = DQN.load("models/{}".format(model_name))
+    except:
+        pass
 
     model = DQN(CnnPolicy,
                 env,
@@ -68,11 +76,16 @@ def run(run_name):
         model.learn(total_timesteps=steps,
                     # , eval_callback, checkpoint_callback],
                     callback=[progress_callback],
-                    tb_log_name=run_name)
+                    tb_log_name=model_name)
 
     print("Done! Saving model...")
-    model.save("models/{}".format(run_name))
+    model.save("models/{}".format(model_name))
 
 
 if __name__ == "__main__":
-    run("dqn")
+    parser = argparse.ArgumentParser('Name of model.')
+    parser.add_argument('model', type=str,
+                        help='required model name inside models folder')
+    args = parser.parse_args()
+    print("Evaluating model models/{}.zip".format(args.model))
+    run(args.model)

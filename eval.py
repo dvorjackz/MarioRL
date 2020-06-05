@@ -13,13 +13,15 @@ def eval(model_name):
     # Suppress warnings
     tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
-    env = gym_super_mario_bros.make('SuperMarioBros-v2')
+    smb = 'SuperMarioBros-1-2-v2'
+
+    env = gym_super_mario_bros.make(smb)
     env = JoypadSpace(env, RIGHT_ONLY)
     env = EpisodicLifeEnv(env)
     env = WarpFrame(env)
     env = FrameStack(env, n_frames=4)
 
-    env_render = gym_super_mario_bros.make('SuperMarioBros-v0')
+    env_render = gym_super_mario_bros.make(smb)
     env_render = JoypadSpace(env_render, RIGHT_ONLY)
 
     model = DQN.load("models/{}".format(model_name))
