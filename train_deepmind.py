@@ -2,6 +2,7 @@ from nes_py.wrappers import JoypadSpace
 import gym_super_mario_bros
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT, RIGHT_ONLY, COMPLEX_MOVEMENT
 from stable_baselines import DQN
+from stable_baselines.bench import Monitor
 from stable_baselines.common.vec_env import SubprocVecEnv
 from stable_baselines.deepq.policies import MlpPolicy, CnnPolicy, LnCnnPolicy
 from stable_baselines.common.atari_wrappers import FrameStack, WarpFrame, MaxAndSkipEnv, EpisodicLifeEnv
@@ -10,6 +11,7 @@ from callbacks import ProgressBarManager
 import tensorflow as tf
 from matplotlib import pyplot as plt
 import cv2
+import os
 # Suppress warnings
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
@@ -27,13 +29,20 @@ def test_env(env, frame_by_frame=False):
         print("timestep:", info['timestep'])
 
 def run(run_name):
+
+    # Create log dir
+    log_dir = "./monitor_logs/"
+    os.makedirs(log_dir, exist_ok=True)
+
+
     print ("Setting up environment...")
-    env = gym_super_mario_bros.make('SuperMarioBrosRandomStages-v2')
+    env = gym_super_mario_bros.make('SuperMarioBros-v2')
     env = JoypadSpace(env, RIGHT_ONLY)
     env = WarpFrame(env)
     env = FrameStack(env, n_frames=4)
-    # env = EpisodicLifeEnv(env)
-    # env = MaxAndSkipEnv(env)
+    env = EpisodicLifeEnv(env)
+    # Logs will be saved in log_dir/monitor.csv
+    env = Monitor(env, log_dir)
 
     # Save a checkpoint every 1000 steps
     checkpoint_callback = CheckpointCallback(save_freq=5000, save_path='./logs/',
@@ -47,17 +56,17 @@ def run(run_name):
                                 render=False)
 
     print("Compiling model...")
-    steps = 20000
+    steps = 50
 
     model = DQN(CnnPolicy,
                 env,
                 verbose=1,
-                learning_starts=10000,
+                learning_starts=2500,
                 learning_rate=1e-4,
                 exploration_final_eps=0.01,
                 prioritized_replay=True,
                 prioritized_replay_alpha=0.6,
-                train_freq=4,
+                train_freq=1,
                 tensorboard_log="./mario_tensorboard/"
             )
 
