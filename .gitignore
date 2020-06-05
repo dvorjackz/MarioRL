@@ -1,5 +1,7 @@
 .env/
 *.pkl
+*.zip
+*.local
 *~
 mario_tensorboard/
 tensorboard_old/
