@@ -26,13 +26,13 @@ def test_env(env, frame_by_frame=False):
         print("reward:", rewards)
         print("timestep:", info['timestep'])
 
-def run(run_name, args):
+def run(run_name):
     print ("Setting up environment...")
-    env = gym_super_mario_bros.make('SuperMarioBros-v2')
+    env = gym_super_mario_bros.make('SuperMarioBrosRandomStages-v2')
     env = JoypadSpace(env, RIGHT_ONLY)
     env = WarpFrame(env)
     env = FrameStack(env, n_frames=4)
-    env = EpisodicLifeEnv(env)
+    # env = EpisodicLifeEnv(env)
     # env = MaxAndSkipEnv(env)
 
     # Save a checkpoint every 1000 steps
@@ -47,12 +47,12 @@ def run(run_name, args):
                                 render=False)
 
     print("Compiling model...")
-    steps = 5000
+    steps = 20000
 
     model = DQN(CnnPolicy,
                 env,
                 verbose=1,
-                learning_starts=2500,
+                learning_starts=10000,
                 learning_rate=1e-4,
                 exploration_final_eps=0.01,
                 prioritized_replay=True,

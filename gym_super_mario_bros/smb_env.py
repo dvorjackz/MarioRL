@@ -139,7 +139,7 @@ class SuperMarioBrosEnv(NESEnv):
         return self._read_mem_range(0x07ed, 2)
 
     def lives(self):
-        return self._life
+        return self._life + 1
 
     @property
     def _life(self):
