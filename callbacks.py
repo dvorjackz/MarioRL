@@ -1,10 +1,12 @@
 from stable_baselines.common.callbacks import BaseCallback
 from tqdm.auto import tqdm
 
+
 class ProgressBarCallback(BaseCallback):
     """
     :param pbar: (tqdm.pbar) Progress bar object
     """
+
     def __init__(self, pbar):
         super(ProgressBarCallback, self).__init__()
         self._pbar = pbar

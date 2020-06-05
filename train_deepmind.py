@@ -13,6 +13,7 @@ import cv2
 # Suppress warnings
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
+
 def test_env(env, frame_by_frame=False):
     obs = env.reset()
     while True:
@@ -26,8 +27,9 @@ def test_env(env, frame_by_frame=False):
         print("reward:", rewards)
         print("timestep:", info['timestep'])
 
-def run(run_name, args):
-    print ("Setting up environment...")
+
+def run(run_name):
+    print("Setting up environment...")
     env = gym_super_mario_bros.make('SuperMarioBros-v2')
     env = JoypadSpace(env, RIGHT_ONLY)
     env = WarpFrame(env)
@@ -37,14 +39,14 @@ def run(run_name, args):
 
     # Save a checkpoint every 1000 steps
     checkpoint_callback = CheckpointCallback(save_freq=5000, save_path='./logs/',
-                                            name_prefix=run_name)
+                                             name_prefix=run_name)
 
     eval_callback = EvalCallback(env,
-                                best_model_save_path='./logs/',
-                                log_path='./logs/',
-                                eval_freq=10000,
-                                deterministic=True,
-                                render=False)
+                                 best_model_save_path='./logs/',
+                                 log_path='./logs/',
+                                 eval_freq=10000,
+                                 deterministic=True,
+                                 render=False)
 
     print("Compiling model...")
     steps = 5000
@@ -59,16 +61,18 @@ def run(run_name, args):
                 prioritized_replay_alpha=0.6,
                 train_freq=4,
                 tensorboard_log="./mario_tensorboard/"
-            )
+                )
 
     print("Training starting...")
     with ProgressBarManager(steps) as progress_callback:
         model.learn(total_timesteps=steps,
-                    callback=[progress_callback],#, eval_callback, checkpoint_callback],
+                    # , eval_callback, checkpoint_callback],
+                    callback=[progress_callback],
                     tb_log_name=run_name)
 
     print("Done! Saving model...")
     model.save("models/{}".format(run_name))
+
 
 if __name__ == "__main__":
     run("dqn")
