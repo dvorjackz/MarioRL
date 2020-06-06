@@ -9,9 +9,11 @@ from stable_baselines.common.atari_wrappers import FrameStack, WarpFrame, MaxAnd
 from stable_baselines.common.callbacks import CallbackList, EvalCallback, CheckpointCallback
 from callbacks import ProgressBarManager
 import tensorflow as tf
-from matplotlib import pyplot as plt
 import cv2
 import os
+
+from config import TIME_STEPS
+
 # Suppress warnings
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
@@ -34,7 +36,6 @@ def run(run_name):
     log_dir = "./monitor_logs/"
     os.makedirs(log_dir, exist_ok=True)
 
-
     print ("Setting up environment...")
     env = gym_super_mario_bros.make('SuperMarioBros-v2')
     env = JoypadSpace(env, RIGHT_ONLY)
@@ -56,12 +57,11 @@ def run(run_name):
                                 render=False)
 
     print("Compiling model...")
-    steps = 1000000
 
     model = DQN(CnnPolicy,
                 env,
                 verbose=1,
-                learning_starts=2500,
+                learning_starts=10000,
                 learning_rate=1e-4,
                 exploration_final_eps=0.01,
                 prioritized_replay=True,
@@ -71,9 +71,10 @@ def run(run_name):
             )
 
     print("Training starting...")
-    with ProgressBarManager(steps) as progress_callback:
-        model.learn(total_timesteps=steps,
-                    callback=[progress_callback],#, eval_callback, checkpoint_callback],
+    with ProgressBarManager(TIME_STEPS) as progress_callback:
+        model.learn(total_timesteps=TIME_STEPS,
+                    log_interval=1,
+                    callback=[progress_callback], #, eval_callback, checkpoint_callback],
                     tb_log_name=run_name)
 
     print("Done! Saving model...")
