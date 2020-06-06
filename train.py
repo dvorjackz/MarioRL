@@ -56,7 +56,7 @@ def run(run_name):
                                 render=False)
 
     print("Compiling model...")
-    steps = 50
+    steps = 1000000
 
     model = DQN(CnnPolicy,
                 env,
