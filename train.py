@@ -38,27 +38,27 @@ def run(run_name):
 
     print ("Setting up environment...")
     env = gym_super_mario_bros.make('SuperMarioBros-v0')
-    env = JoypadSpace(env, RIGHT_ONLY)
+    env = JoypadSpace(env, SIMPLE_MOVEMENT)
     env = EpisodicLifeEnv(env)
 
     # Preprocessing
     env = WarpFrame(env)
     env = FrameStack(env, n_frames=hp.FRAME_STACK)
 
-    # Evaluate every kth frame and repeat action for k timesteps
+    # Evaluate every kth frame and repeat action
     env = MaxAndSkipEnv(env, skip=hp.FRAME_SKIP)
 
     # Logs will be saved in log_dir/monitor.csv
     env = Monitor(env, log_dir)
 
     # Save a checkpoint every 1000 steps
-    checkpoint_callback = CheckpointCallback(save_freq=5000, save_path='./logs/',
+    checkpoint_callback = CheckpointCallback(save_freq=50000, save_path='./models/',
                                             name_prefix=run_name)
 
     eval_callback = EvalCallback(env,
-                                best_model_save_path='./logs/',
-                                log_path='./logs/',
-                                eval_freq=10000,
+                                best_model_save_path='./models/',
+                                log_path='./models/',
+                                eval_freq=250000,
                                 deterministic=True,
                                 render=False)
 
@@ -68,7 +68,7 @@ def run(run_name):
                 env,
                 batch_size=hp.BATCH_SIZE, # Optimizable (higher batch sizes ok according to https://arxiv.org/pdf/1803.02811.pdf)
                 verbose=1, 
-                learning_starts=hp.TIME_STEPS/10,
+                learning_starts=10000,
                 learning_rate=hp.LEARNING_RATE,
                 exploration_fraction=hp.EXPLORATION_FRACT,
                 exploration_initial_eps=1.0,
@@ -84,11 +84,11 @@ def run(run_name):
     with ProgressBarManager(hp.TIME_STEPS) as progress_callback:
         model.learn(total_timesteps=hp.TIME_STEPS,
                     log_interval=1,
-                    callback=[progress_callback], #, eval_callback, checkpoint_callback],
+                    callback=[progress_callback, checkpoint_callback, eval_callback],
                     tb_log_name=run_name)
 
     print("Done! Saving model...")
-    model.save("models/{}".format(run_name))
+    model.save("models/{}_final".format(run_name))
 
 if __name__ == "__main__":
     run("dqn")

@@ -9,13 +9,16 @@ import tensorflow as tf
 # Suppress warnings
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
-env = gym_super_mario_bros.make('SuperMarioBros-v0')
-env = JoypadSpace(env, RIGHT_ONLY)
-env = WarpFrame(env)
-env = FrameStack(env, n_frames=4)
-env = EpisodicLifeEnv(env)
+import hyperparams as hp
 
-model = DQN.load("models/dqn")
+env = gym_super_mario_bros.make('SuperMarioBros-v0')
+env = JoypadSpace(env, SIMPLE_MOVEMENT)
+env = EpisodicLifeEnv(env)
+env = WarpFrame(env)
+env = FrameStack(env, n_frames=hp.FRAME_STACK)
+env = MaxAndSkipEnv(env, skip=hp.FRAME_SKIP)
+
+model = DQN.load("models/best_model")
 
 obs = env.reset()
 
@@ -32,6 +35,6 @@ obs = env.reset()
 #         cr = 0
 #         break
 
-evaluate_policy(model, env, n_eval_episodes=10, deterministic=False, render=True)
+print(evaluate_policy(model, env, n_eval_episodes=10, deterministic=False, render=True, return_episode_rewards=True))
 
 print("Done.")
