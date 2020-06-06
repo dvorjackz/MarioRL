@@ -12,7 +12,7 @@ import tensorflow as tf
 import cv2
 import os
 
-from config import TIME_STEPS
+import hyperparams as hp
 
 # Suppress warnings
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
@@ -39,9 +39,15 @@ def run(run_name):
     print ("Setting up environment...")
     env = gym_super_mario_bros.make('SuperMarioBros-v2')
     env = JoypadSpace(env, RIGHT_ONLY)
-    env = WarpFrame(env)
-    env = FrameStack(env, n_frames=4)
     env = EpisodicLifeEnv(env)
+
+    # Preprocessing
+    env = WarpFrame(env)
+    env = FrameStack(env, n_frames=hp.FRAME_STACK)
+
+    # Evaluate every kth frame and repeat action for k timesteps
+    env = MaxAndSkipEnv(env, skip=hp.FRAME_SKIP)
+
     # Logs will be saved in log_dir/monitor.csv
     env = Monitor(env, log_dir)
 
@@ -58,21 +64,25 @@ def run(run_name):
 
     print("Compiling model...")
 
-    model = DQN(CnnPolicy,
+    model = DQN(LnCnnPolicy,
                 env,
-                verbose=1,
-                learning_starts=10000,
-                learning_rate=1e-4,
-                exploration_final_eps=0.01,
-                prioritized_replay=True,
-                prioritized_replay_alpha=0.6,
-                train_freq=1,
+                batch_size=hp.BATCH_SIZE, # Optimizable (higher batch sizes ok according to https://arxiv.org/pdf/1803.02811.pdf)
+                verbose=1, 
+                learning_starts=hp.TIME_STEPS/10,
+                learning_rate=hp.LEARNING_RATE,
+                exploration_fraction=hp.EXPLORATION_FRACT,
+                exploration_initial_eps=1.0,
+                exploration_final_eps=0.1,
+                prioritized_replay=True, 
+                prioritized_replay_alpha=hp.P_REPLAY_ALPHA,
+                train_freq=hp.TRAINING_FREQ,
+                target_network_update_freq=hp.TARGET_UPDATE_FREQ,
                 tensorboard_log="./mario_tensorboard/"
             )
 
     print("Training starting...")
-    with ProgressBarManager(TIME_STEPS) as progress_callback:
-        model.learn(total_timesteps=TIME_STEPS,
+    with ProgressBarManager(hp.TIME_STEPS) as progress_callback:
+        model.learn(total_timesteps=hp.TIME_STEPS,
                     log_interval=1,
                     callback=[progress_callback], #, eval_callback, checkpoint_callback],
                     tb_log_name=run_name)

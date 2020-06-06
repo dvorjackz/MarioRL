@@ -58,8 +58,8 @@ class SuperMarioBrosEnv(NESEnv):
         self._time_last = 0
         # setup a variable to keep track of the last frames x position
         self._x_position_last = 0
-        # if Mario stands still, this timer goes up
-        self._standstill_timer = 0
+        # # if Mario stands still, this timer goes up
+        # self._standstill_timer = 0
         # timestep
         self._timestep = 0
         # life variable that makes this compatible with EpisodicLifeEnv from atari_wrappers.py
@@ -334,10 +334,11 @@ class SuperMarioBrosEnv(NESEnv):
     def _x_reward(self):
         """Return the reward based on left right movement between steps."""
         _reward = self._x_position - self._x_position_last
-        if (abs(self._x_position - self._x_position_last) < 1):
-            self._standstill_timer += 1
-        else:
-            self._standstill_timer = 0
+        # if (abs(self._x_position - self._x_position_last) < 1):
+        #     self._standstill_timer += 1
+        # else:
+        #     self._standstill_timer = 0
+        
         # _reward -= self._standstill_timer * 0.5
         self._x_position_last = self._x_position
         # TODO: check whether this is still necessary
@@ -363,7 +364,7 @@ class SuperMarioBrosEnv(NESEnv):
     @property
     def _death_penalty(self):
         """Return the reward earned by dying."""
-        if self._is_dying or self._is_dead or self._standstill_timer >= 300:
+        if self._is_dying or self._is_dead: # or self._standstill_timer >= 300:
             return -25
 
         return 0
@@ -374,7 +375,7 @@ class SuperMarioBrosEnv(NESEnv):
         """Handle and RAM hacking before a reset occurs."""
         self._time_last = 0
         self._x_position_last = 0
-        self._standstill_timer = 0
+        # self._standstill_timer = 0
         self._timestep = 0
 
     def _did_reset(self):
@@ -398,7 +399,7 @@ class SuperMarioBrosEnv(NESEnv):
         if done:
             return
         # if mario is dying, then cut to the chase and kill him,
-        if self._is_dying or self._standstill_timer >= 300:
+        if self._is_dying: # or self._standstill_timer >= 300:
             self._kill_mario()
         # skip world change scenes (must call before other skip methods)
         if not self.is_single_stage_env:
@@ -411,7 +412,7 @@ class SuperMarioBrosEnv(NESEnv):
 
     def _get_reward(self):
         """Return the reward after a step occurs."""
-        return self._x_reward + self._time_penalty + self._death_penalty
+        return self._x_reward + self._death_penalty
 
     def _get_done(self):
         """Return True if the episode is over, False otherwise."""
@@ -432,7 +433,7 @@ class SuperMarioBrosEnv(NESEnv):
             world=self._world,
             x_pos=self._x_position,
             y_pos=self._y_position,
-            standstill=self._standstill_timer,
+            # standstill=self._standstill_timer,
             timestep = self._timestep,
         )
 
