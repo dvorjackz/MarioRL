@@ -53,7 +53,7 @@ def run(run_name):
                 prioritized_replay=True,
                 prioritized_replay_alpha=0.6,
                 buffer_size=10000,
-                train_freq=4,
+                train_freq=1,
                 target_network_update_freq=1000,
                 tensorboard_log="./mario_tensorboard/"
             )
