@@ -9,18 +9,19 @@ import tensorflow as tf
 # Suppress warnings
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
-env = gym_super_mario_bros.make('SuperMarioBros-v2')
+# for i in range(1, 9):
+#     for j in range(2, 5):
+env_name = 'SuperMarioBros-3-1'
+env = gym_super_mario_bros.make(env_name + "-v2")
 env = JoypadSpace(env, RIGHT_ONLY)
 env = WarpFrame(env)
 env = FrameStack(env, n_frames=4)
-env = EpisodicLifeEnv(env)
+# env = EpisodicLifeEnv(env)
 
-
-
-env_render = gym_super_mario_bros.make('SuperMarioBros-v0')
+env_render = gym_super_mario_bros.make(env_name + "-v0")
 env_render = JoypadSpace(env_render, RIGHT_ONLY)
 
-model = DQN.load("best_model_1")
+model = DQN.load("dqn_1240000_steps")
 
 obs = env.reset()
 env_render.reset()
@@ -28,10 +29,11 @@ env_render.reset()
 cr = 0
 while True:
     action, _states = model.predict(obs)
+    print(action)
     obs, rewards, done, info = env.step(action)
     env_render.step(action)
     cr += rewards
-    print("reward:{}\t\t".format(cr), end='\r')
+    # print("reward:{}\t\t".format(cr), end='\r')
     env_render.render()
     if (done):
         print("finished an episode with total reward:", cr)
