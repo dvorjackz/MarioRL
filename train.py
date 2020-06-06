@@ -37,7 +37,7 @@ def run(run_name):
     os.makedirs(log_dir, exist_ok=True)
 
     print ("Setting up environment...")
-    env = gym_super_mario_bros.make('SuperMarioBros-v2')
+    env = gym_super_mario_bros.make('SuperMarioBros-v0')
     env = JoypadSpace(env, RIGHT_ONLY)
     env = EpisodicLifeEnv(env)
 

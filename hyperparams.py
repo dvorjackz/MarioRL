@@ -1,6 +1,6 @@
 # List of potential hyperparameters to tune
 
-TIME_STEPS = 12000
+TIME_STEPS = 5000
 
 # Data preprocessing & other Atari wrappers
 FRAME_STACK = 4 # Nature uses 4
