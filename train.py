@@ -11,6 +11,7 @@ from callbacks import ProgressBarManager
 import tensorflow as tf
 import cv2
 import os
+import argparse
 
 import hyperparams as hp
 
@@ -30,7 +31,7 @@ def test_env(env, frame_by_frame=False):
         print("reward:", rewards)
         print("timestep:", info['timestep'])
 
-def run(run_name):
+def run(run_name, existing_model):
 
     # Create log dir
     log_dir = "./monitor_logs/"
@@ -52,7 +53,7 @@ def run(run_name):
     env = Monitor(env, log_dir)
 
     # Save a checkpoint every 1000 steps
-    checkpoint_callback = CheckpointCallback(save_freq=50000, save_path='./models/',
+    checkpoint_callback = CheckpointCallback(save_freq=25000, save_path='./models/',
                                             name_prefix=run_name)
 
     eval_callback = EvalCallback(env,
@@ -64,21 +65,28 @@ def run(run_name):
 
     print("Compiling model...")
 
-    model = DQN(LnCnnPolicy,
-                env,
-                batch_size=hp.BATCH_SIZE, # Optimizable (higher batch sizes ok according to https://arxiv.org/pdf/1803.02811.pdf)
-                verbose=1, 
-                learning_starts=10000,
-                learning_rate=hp.LEARNING_RATE,
-                exploration_fraction=hp.EXPLORATION_FRACT,
-                exploration_initial_eps=1.0,
-                exploration_final_eps=0.1,
-                prioritized_replay=True, 
-                prioritized_replay_alpha=hp.P_REPLAY_ALPHA,
-                train_freq=hp.TRAINING_FREQ,
-                target_network_update_freq=hp.TARGET_UPDATE_FREQ,
-                tensorboard_log="./mario_tensorboard/"
-            )
+    if existing_model:
+        try:
+            model = DQN.load(existing_model, env)
+        except:
+            print(f"{existing_model} does not exist!")
+            exit(0)
+    else:
+        model = DQN(LnCnnPolicy,
+                    env,
+                    batch_size=hp.BATCH_SIZE, # Optimizable (higher batch sizes ok according to https://arxiv.org/pdf/1803.02811.pdf)
+                    verbose=1, 
+                    learning_starts=10000,
+                    learning_rate=hp.LEARNING_RATE,
+                    exploration_fraction=hp.EXPLORATION_FRACT,
+                    exploration_initial_eps=1.0,
+                    exploration_final_eps=0.1,
+                    prioritized_replay=True, 
+                    prioritized_replay_alpha=hp.P_REPLAY_ALPHA,
+                    train_freq=hp.TRAINING_FREQ,
+                    target_network_update_freq=hp.TARGET_UPDATE_FREQ,
+                    tensorboard_log="./mario_tensorboard/"
+                )
 
     print("Training starting...")
     with ProgressBarManager(hp.TIME_STEPS) as progress_callback:
@@ -91,4 +99,7 @@ def run(run_name):
     model.save("models/{}_final".format(run_name))
 
 if __name__ == "__main__":
-    run("dqn")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--train-existing", nargs=1, help="Train existing model")
+    args = parser.parse_args()
+    run("dqn", args.train_existing[0])
