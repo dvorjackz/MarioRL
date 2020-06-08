@@ -1,4 +1,5 @@
 import numpy as np
+import time
 
 from stable_baselines.common.vec_env import VecEnv
 
@@ -35,6 +36,7 @@ def evaluate_policy(model, env, n_eval_episodes=10, deterministic=True,
         episode_reward = 0.0
         episode_length = 0
         while not done:
+            time.sleep(0.05)
             action, state = model.predict(obs, state=state, deterministic=deterministic)
             obs, reward, done, _info = env.step(action)
             episode_reward += reward

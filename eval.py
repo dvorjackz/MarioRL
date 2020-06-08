@@ -18,7 +18,7 @@ env = WarpFrame(env)
 env = FrameStack(env, n_frames=hp.FRAME_STACK)
 env = MaxAndSkipEnv(env, skip=hp.FRAME_SKIP)
 
-model = DQN.load("models/best_model")
+model = DQN.load("models/dqn_1825000_steps")
 
 obs = env.reset()
 
