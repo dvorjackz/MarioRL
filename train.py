@@ -1,5 +1,6 @@
 import os
 import cv2
+import argparse
 import tensorflow as tf
 from matplotlib import pyplot as plt
 from nes_py.wrappers import JoypadSpace
@@ -11,19 +12,9 @@ from stable_baselines.deepq.policies import CnnPolicy, LnCnnPolicy
 from stable_baselines.common.atari_wrappers import FrameStack, WarpFrame, MaxAndSkipEnv, EpisodicLifeEnv
 from stable_baselines.common.callbacks import CallbackList, EvalCallback, CheckpointCallback
 from callbacks import ProgressBarManager
-
-# CONSTANTS
-TIME_STEPS = 10000
-# Data preprocessing & other Atari wrappers
-FRAME_STACK = 4  # Nature uses 4
-FRAME_SKIP = 8  # Nature uses 4
-# Neural network
-BATCH_SIZE = 96
-LEARNING_RATE = 1e-4
-EXPLORATION_FRACT = 0.1  # Nature uses 0.1
-P_REPLAY_ALPHA = 0.6
-TRAINING_FREQ = 4
-TARGET_UPDATE_FREQ = 10000
+import qmap
+from qmap.qmap.train_mario import QMapDQNMario
+import hyperparams as hp
 
 # Suppress warnings
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
@@ -43,8 +34,8 @@ def test_env(env, frame_by_frame=False):
         print("timestep:", info['timestep'])
 
 
-def run(model_name):
-    print("Setting up environment...")
+def run(model_name='dqn'):
+    print("Setting up environment for DQN...")
 
     # Create log dir
     log_dir = "./monitor_logs/"
@@ -57,10 +48,10 @@ def run(model_name):
 
     # Preprocessing
     env = WarpFrame(env)
-    env = FrameStack(env, n_frames=FRAME_STACK)
+    env = FrameStack(env, n_frames=hp.FRAME_STACK)
 
     # Evaluate every kth frame and repeat action
-    env = MaxAndSkipEnv(env, skip=FRAME_SKIP)
+    env = MaxAndSkipEnv(env, skip=hp.FRAME_SKIP)
 
     # Logs will be saved in log_dir/monitor.csv
     env = Monitor(env, log_dir)
@@ -83,17 +74,16 @@ def run(model_name):
     except:
         pass
 
-        # The probability of greedy actions from DQN increases from 0 to 0.95 linearly during the first 75% steps
     model = DQN(LnCnnPolicy,
                 env,
                 gamma=0.99,
-                learning_rate=LEARNING_RATE,  # 1e-4 for QMap paper
+                learning_rate=hp.LEARNING_RATE,  # 1e-4 for QMap paper
                 buffer_size=500000,  # 500,000 for QMap paper
-                exploration_fraction=EXPLORATION_FRACT,
+                exploration_fraction=hp.EXPLORATION_FRACT,
                 exploration_initial_eps=1.0,
                 exploration_final_eps=0.1,
                 train_freq=4,  # 4 for QMap paper
-                batch_size=BATCH_SIZE,
+                batch_size=hp.BATCH_SIZE,
                 double_q=True,
                 # QMap paper: training starts after 1000 steps and the networks are used after 2000 steps
                 learning_starts=1000,
@@ -112,8 +102,8 @@ def run(model_name):
                 )
 
     print("Training starting...")
-    with ProgressBarManager(TIME_STEPS) as progress_callback:
-        model.learn(total_timesteps=TIME_STEPS,
+    with ProgressBarManager(hp.TIME_STEPS) as progress_callback:
+        model.learn(total_timesteps=hp.TIME_STEPS,
                     # , eval_callback, checkpoint_callback],
                     callback=[progress_callback],
                     tb_log_name=model_name)
@@ -121,6 +111,22 @@ def run(model_name):
     print("Done! Saving model...")
     model.save("models/{}".format(model_name))
 
+# Experiments with QMap DQN taken from: https://github.com/fabiopardo/qmap (https://arxiv.org/pdf/1807.02078.pdf)
+
+
+def run_qmap():
+    print("Setting up environment for DQN with QMap...")
+    qmap_mario = QMapDQNMario(n_steps=hp.TIME_STEPS)
+    qmap_mario()
+
 
 if __name__ == "__main__":
-    run("dqn")
+    parser = argparse.ArgumentParser('Name of model.')
+    parser.add_argument('-q', '--qmap', action='store_true',
+                        help='required model name inside models folder')
+    args = parser.parse_args()
+
+    if args.qmap:
+        run_qmap()
+    else:
+        run()

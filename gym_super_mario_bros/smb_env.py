@@ -9,7 +9,7 @@ from ._roms import rom_path
 
 
 # create a dictionary mapping value of status register to string names
-_STATUS_MAP = defaultdict(lambda: 'fireball', {0:'small', 1: 'tall'})
+_STATUS_MAP = defaultdict(lambda: 'fireball', {0: 'small', 1: 'tall'})
 
 
 # a set of state values indicating that Mario is "busy"
@@ -25,6 +25,7 @@ _ENEMY_TYPE_ADDRESSES = [0x0016, 0x0017, 0x0018, 0x0019, 0x001A]
 # Bowser = 0x2D
 # Flagpole = 0x31
 _STAGE_OVER_ENEMIES = np.array([0x2D, 0x31])
+
 
 class SuperMarioBrosEnv(NESEnv):
     """An environment for playing Super Mario Bros with OpenAI Gym."""
@@ -421,7 +422,7 @@ class SuperMarioBrosEnv(NESEnv):
 
     def _get_info(self):
         """Return the info after a step occurs"""
-        return dict(
+        info = dict(
             coins=self._coins,
             flag_get=self._flag_get,
             life=self._life,
@@ -433,8 +434,9 @@ class SuperMarioBrosEnv(NESEnv):
             x_pos=self._x_position,
             y_pos=self._y_position,
             standstill=self._standstill_timer,
-            timestep = self._timestep,
+            timestep=self._timestep,
         )
+        return info
 
 
 # explicitly define the outward facing API of this module
