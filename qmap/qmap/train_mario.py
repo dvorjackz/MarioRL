@@ -11,19 +11,6 @@ from .envs.custom_mario import CustomSuperMarioAllStarsEnv
 from .envs.wrappers import PerfLogger
 
 
-# parser = argparse.ArgumentParser(
-#     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-# parser.add_argument(
-#     '--seed', help='random number generator seed', type=int, default=0)
-# parser.add_argument('--path', default='qmap_results')
-# parser.add_argument('--level', help='game level', default='1.1')
-# parser.add_argument('--load', help='path to the agent to load', default=None)
-# boolean_flag(parser, 'dqn', default=True)
-# boolean_flag(parser, 'qmap', default=True)
-# boolean_flag(parser, 'render', help='play the videos', default=False)
-# args = parser.parse_args()
-
-
 class QMapDQNMario(object):
     def __init__(self,
                  n_steps=int(5e4),
@@ -41,13 +28,11 @@ class QMapDQNMario(object):
         set_global_seeds(seed)
         self.env.seed(seed)
 
-        print('~~~~~~~~~~~~~~~~~~~~~~')
-        print(self.env)
-        print(self.env.unwrapped.name)
-        print('observations:', self.env.observation_space.shape)
-        print('coords:     ', self.coords_shape)
-        print('actions:    ', self.env.action_space.n)
-        print('~~~~~~~~~~~~~~~~~~~~~~')
+        # print(self.env)
+        # print(self.env.unwrapped.name)
+        # print('observations:', self.env.observation_space.shape)
+        # print('coords:     ', self.coords_shape)
+        # print('actions:    ', self.env.action_space.n)
 
         def call():
             config = tf.ConfigProto(allow_soft_placement=True)
