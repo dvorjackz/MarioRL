@@ -3,6 +3,7 @@ import gym
 import numpy as np
 from nes_py.nes_env import SCREEN_HEIGHT, SCREEN_WIDTH
 from .smb_env import SuperMarioBrosEnv
+from types import SimpleNamespace
 
 
 class SuperMarioBrosRandomStagesEnv(gym.Env):
@@ -45,6 +46,10 @@ class SuperMarioBrosRandomStagesEnv(gym.Env):
                 target = (world, stage)
                 # create the environment with the given ROM mode
                 env = SuperMarioBrosEnv(rom_mode=rom_mode, target=target)
+
+                # life variable that makes this compatible with EpisodicLifeEnv from atari_wrappers.py
+                self.unwrapped.ale = env.unwrapped.ale
+
                 # add the environment to the stage list for this world
                 self.envs[-1].append(env)
         # create a placeholder for the current environment

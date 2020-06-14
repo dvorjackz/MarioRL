@@ -9,3 +9,4 @@ models/
 .vscode/
 __pycache__/
 logs/
+stable_baselines/

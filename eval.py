@@ -13,7 +13,7 @@ def eval(model_name):
     # Suppress warnings
     tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
-    smb = 'SuperMarioBros-1-2-v2'
+    smb = 'SuperMarioBrosRandomStagesEnv'
 
     env = gym_super_mario_bros.make(smb)
     env = JoypadSpace(env, RIGHT_ONLY)
@@ -35,7 +35,7 @@ def eval(model_name):
         obs, rewards, done, info = env.step(action)
         env_render.step(action)
         cr += rewards
-        print("reward:{}\t\t".format(cr))
+        print("reward:\t{}".format(cr))
         env_render.render()
         if (done):
             print("finished an episode")
