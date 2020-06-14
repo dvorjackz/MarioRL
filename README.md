@@ -1,4 +1,4 @@
-# MarioRL
+# MarI/O: Double DQN to Play Super Mario Bros
 
 ## Setup
 
