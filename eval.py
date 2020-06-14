@@ -11,14 +11,14 @@ tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 import hyperparams as hp
 
-env = gym_super_mario_bros.make('SuperMarioBros-v0')
+env = gym_super_mario_bros.make('SuperMarioBrosRandomStages-v0')
 env = JoypadSpace(env, SIMPLE_MOVEMENT)
 env = EpisodicLifeEnv(env)
 env = WarpFrame(env)
 env = FrameStack(env, n_frames=hp.FRAME_STACK)
 env = MaxAndSkipEnv(env, skip=hp.FRAME_SKIP)
 
-model = DQN.load("models/dqn_1825000_steps")
+model = DQN.load("models/round3/best_model")
 
 obs = env.reset()
 
@@ -35,6 +35,6 @@ obs = env.reset()
 #         cr = 0
 #         break
 
-print(evaluate_policy(model, env, n_eval_episodes=10, deterministic=False, render=True, return_episode_rewards=True))
+print(evaluate_policy(model, env, n_eval_episodes=10, deterministic=False, render=True))
 
 print("Done.")

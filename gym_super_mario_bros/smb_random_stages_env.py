@@ -3,7 +3,7 @@ import gym
 import numpy as np
 from nes_py.nes_env import SCREEN_HEIGHT, SCREEN_WIDTH
 from .smb_env import SuperMarioBrosEnv
-
+from types import SimpleNamespace
 
 class SuperMarioBrosRandomStagesEnv(gym.Env):
     """A Super Mario Bros. environment that randomly selects levels."""
@@ -51,6 +51,8 @@ class SuperMarioBrosRandomStagesEnv(gym.Env):
         self.env = self.envs[0][0]
         # create a placeholder for the image viewer to render the screen
         self.viewer = None
+        self.unwrapped.ale = SimpleNamespace()
+        self.ale.lives = self.env.lives
 
     def _select_random_level(self):
         """Select a random level to use."""
