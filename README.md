@@ -41,7 +41,7 @@ python3 eval.py
 
 ### QMap DQN
 
-Conduct tests with [Goal-based exploration](https://github.com/fabiopardo/qmap/blob/master/qmap/train_mario.py). QMap implementation taken from [Fabien Pardo's QMap project](https://github.com/fabiopardo/qmap/blob/master/qmap/train_mario.py) which uses [OpenAI Baselines](https://github.com/openai/baselines).
+Conduct tests with [Goal-based exploration](https://arxiv.org/pdf/1807.02078.pdf). QMap implementation taken from [Fabien Pardo's QMap project](https://github.com/fabiopardo/qmap) which uses [OpenAI Baselines](https://github.com/openai/baselines).
 
 ```
 python3 train.py --qmap
