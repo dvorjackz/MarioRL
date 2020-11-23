@@ -1,6 +1,6 @@
 # MarioRL
 
-Using [Gym Super Mario Bros](https://pypi.org/project/gym-super-mario-bros/) as the environment and the [Stable Baselines](https://github.com/hill-a/stable-baselines), a fork of OpenAI's popular [Baselines](https://github.com/openai/baselines) reinforcement learning library, we apply concepts highlighted in recent influential papers in the RL space to traing an agent to beat Super Mario Bros for NES as quickly as possible. 
+Using [Gym Super Mario Bros](https://pypi.org/project/gym-super-mario-bros/) as the environment and [Stable Baselines](https://github.com/hill-a/stable-baselines), a fork of OpenAI's popular [Baselines](https://github.com/openai/baselines) reinforcement learning library, we apply concepts highlighted in recent influential papers in the RL space to traing an agent to beat Super Mario Bros for NES as quickly as possible. 
 
 The final report on our findings is included in the repo as paper.pdf. 
 
